@@ -44,4 +44,4 @@ def combine_genre(all_data):
 	return all_data
 
 all_data =combine_data()
-print(all_data.tail())
+print(all_data.columns)
