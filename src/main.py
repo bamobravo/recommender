@@ -9,6 +9,9 @@ from pgmpy.factors.discrete.CPD import TabularCPD
 from pgmpy.estimators import MaximumLikelihoodEstimator
 import data
 import random
+import pickle
+import utility
+import os
 
 class Recommender:
 	"""docstring """
@@ -18,6 +21,12 @@ class Recommender:
 		
 
 	def buildModel(self):
+		filename = 'saved/model.bat'
+		if os.path.isfile(filename):
+			self.model = utility.loadModel()
+			print('model loaded successfully')
+			return
+
 		edges =[('movie_id','zip_code'),('movie_id','gender'),('movie_id','age_class'),('zip_code','occupation'),('gender','occupation'),('occupation','genre'),('age_class','occupation'),('genre','CompanionContext'),('CompanionContext','rated')]
 		self.model = BayesianModel(edges)
 		zip_code,gender,age_class,movie_id,occupation,rated,genre_cpd,context_cpd = tuple(self.getCPDs())
@@ -28,8 +37,9 @@ class Recommender:
 		# self.model.add_cpds(genre_cpd,context_cpd)
 		if not self.model.check_model():
 			raise Exception('There is a problem creating the model')
+		utility.saveModel(self.model)
 		print('model built successfully')
-		exit()
+
 
 	def getCPDs(self):
 		genres = ['comedy','short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children',  'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
@@ -112,6 +122,16 @@ class Recommender:
 		arr = np.array(lst)
 		result=np.transpose(arr)
 		return result
+
+
+	# the set of functions for performing inference on the graphical model
+
+	def queryModel(self,variables,evidence):
+		"""
+			The query should be a set of parameters and a set of values
+		"""
+		return self.model.query(variables=variables,evidence=evidence)
+		pass
 
 temp = Recommender()
 
