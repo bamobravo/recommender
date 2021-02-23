@@ -8,13 +8,85 @@ import os
 from sklearn.model_selection import train_test_split
 training_data_path='saved/training.csv'
 testing_data_path = 'saved/testing.csv'
+import pickle
 
-def combine_data():
+lookup ={}
+filepath='saved/lookup.pickle'
+if os.path.isfile(filepath):
+	with open(filepath,'rb') as fl:
+		lookup = pickle.load(fl)
+
+def getIndex(value, array,columnType=False):
+	try:
+		if columnType=='genre':
+			vals = value.split(',')
+			temp= [str(array.index(x)+1) for x in vals]
+			res=','.join(temp)
+			return res
+		result = array.index(value)
+		return str(result+1)
+	except Exception as e:
+		return '-1'
+	
+def transform_function(row):
+	row['gender'] = getIndex(row['gender'],lookup['gender'])
+	row['occupation']= getIndex(row['occupation'],lookup['occupation'])
+	row['zip_code'] = getIndex(row['zip_code'],lookup['zip_code'])
+	row['age_class'] = getIndex(row['age_class'],lookup['age_class'])
+	row['genre'] = getIndex(row['genre'],lookup['genre'],columnType='genre')
+	row['CompanionContext'] = getIndex(row['CompanionContext'],lookup['CompanionContext'])
+	return row
+
+def loadList(path):
 	directory='datasets/ml-100k/'
-	if os.path.isfile(training_data_path):
-		result = pd.read_csv(training_data_path,sep='\t')
+	fullpath = directory+path
+	result=[]
+	with open(fullpath,'r') as fl:
+		text = fl.read()
+		result= [x.strip() for x in text.split('\n')]
 		return result
-	u_data = pd.read_csv(directory+"u.data",sep='\t',names=['user_id','movie_id','rating','rating_time'])
+
+def buildLookup():
+	heading=['zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
+	result={}
+	result['occupation']=loadList('u.occupation')
+	result['']
+	print(result['occupation'])
+	exit()
+	lookup = {x:list(all_data[x].unique()) for x in heading}
+	temp_genre =[]
+	lookup['genre']=['comedy','short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children',  'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
+	with open(filepath,'wb') as fl:
+		pickle.dump(lookup,fl)
+
+def transformNumeric(all_data):
+	lookup ={}
+	filepath='saved/lookup.pickle'
+	if os.path.isfile(filepath):
+		with open(filepath,'rb') as fl:
+			lookup = pickle.load(fl)
+	else:
+		heading=['zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
+		lookup = {x:list(all_data[x].unique()) for x in heading}
+		temp_genre =[]
+		lookup['genre']=['comedy','short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children',  'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
+		with open(filepath,'wb') as fl:
+			pickle.dump(lookup,fl)
+	# perform conversion for genre movie
+	print('need to process ',all_data.shape[0])
+	for index, row in all_data.iterrows():
+		all_data.at[index,['gender']] = getIndex(row['gender'],lookup['gender'])
+		all_data.at[index,['occupation']]= getIndex(row['occupation'],lookup['occupation'])
+		all_data.at[index,['zip_code']] = getIndex(row['zip_code'],lookup['zip_code'])
+		all_data.at[index,['age_class']] = getIndex(row['age_class'],lookup['age_class'])
+		all_data.at[index,['genre']] = getIndex(row['genre'],lookup['genre'],columnType='genre')
+		all_data.at[index,['CompanionContext']] = getIndex(row['CompanionContext'],lookup['CompanionContext'])
+		print('processing ',index+1)
+	return all_data
+
+def combine_data(filepath):
+	directory='datasets/ml-100k/'
+	u_data = pd.read_csv(directory+filepath,sep='\t',names=['user_id','movie_id','rating','rating_time'])
 	movie_genres=['unknown','action','adventure','animation','children','comedy','crime','documentary','drama','fantasy','film-noir','horror','musical','mystery','romance','sci-fi','thriller','war','western']
 	movie_info=['movie_id','movie_title','release_date','video_release_date','IMDB_url']
 	movie_header= movie_info+movie_genres
@@ -26,11 +98,34 @@ def combine_data():
 	# now lets join the data together
 	rating_movies = pd.merge(u_data,u_movies,on='movie_id')
 	all_data = pd.merge(rating_movies,users_info,on='user_id')
-	all_data['age_class']=all_data['age']/5
+	all_data['age_class']=all_data['age'].astype('int').floordiv(10,fill_value='1')
+	all_data['zip_code']=all_data['zip_code'].astype('int').floordiv(100,fill_value=1000)
 	all_data['rated']=all_data['rating']>3
 	all_data = all_data.astype({'rated':'int'})
-	return perform_data_split(all_data)
-	return training
+	companions = list(all_data['CompanionContext'].unique())
+	all_data['CompanionContext']=all_data['CompanionContext'].apply(lambda x,arr: arr.index(x)+1,args=(companions,))
+	# all_data = all_data.transform(transform_function,axis=1)
+	# all_data = transformNumeric(all_data)
+	# return perform_data_split(all_data)
+	return all_data
+
+def getTrainingData():
+	if os.path.isfile(training_data_path):
+		result = pd.read_csv(training_data_path,sep='\t')
+		return result
+	filepath='ua.base'
+	result = combine_data(filepath)
+	result.to_csv(training_data_path,sep='\t',index=False)
+	return result
+
+def getTestData():
+	if os.path.isfile(testing_data_path):
+		result = pd.read_csv(testing_data_path,sep='\t')
+		return result
+	filepath='ua.test'
+	result = combine_data(filepath)
+	result.to_csv(testing_data_path,sep='\t',index=False)
+	return result
 
 def perform_data_split(all_data):
 	training,testing  = train_test_split(all_data,test_size=0.15,random_state=40,shuffle=True)
@@ -39,11 +134,11 @@ def perform_data_split(all_data):
 	testing.to_csv(testing_data_path,sep='\t', index=False)
 	return training
 
-
 def combine_genre(all_data):
 	#might have to pik the row one after the the other
 	context_path='datasets/contextualdata_new.csv'
 	contextual_data = pd.read_csv(context_path)
+	contextual_data['CompanionContext'] = contextual_data['CompanionContext'].str.strip()
 	all_data= pd.merge(all_data,contextual_data,left_on='movie_id',right_on='Movie_Id')
 	all_data.insert(5,'music',0)
 	all_data.insert(5,'family',0)
@@ -70,8 +165,13 @@ def combine_genre(all_data):
 	return all_data
 
 def load_test_data():
-	result=pd.read_csv(testing_data_path,sep='\t')
-	return result
+	if os.path.isfile(testing_data_path):
+		result=pd.read_csv(testing_data_path,sep='\t')
+		return result
+	return getTestData()
+	
 
+# print(getTrainingData())
+# exit()
 # all_data =combine_data()
 # print(all_data.columns)

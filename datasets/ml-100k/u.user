@@ -71,7 +71,7 @@
 71|39|M|scientist|98034
 72|48|F|administrator|73034
 73|24|M|student|41850
-74|39|M|scientist|T8H1N
+74|39|M|scientist|10000
 75|24|M|entertainment|08816
 76|20|M|student|02215
 77|30|M|technician|29379
@@ -142,7 +142,7 @@
 142|13|M|other|48118
 143|42|M|technician|08832
 144|53|M|programmer|20910
-145|31|M|entertainment|V3N4P
+145|31|M|entertainment|10000
 146|45|M|artist|83814
 147|40|F|librarian|02143
 148|33|M|engineer|97006
@@ -164,7 +164,7 @@
 164|47|M|healthcare|80123
 165|20|F|other|53715
 166|47|M|educator|55113
-167|37|M|other|L9G2B
+167|37|M|other|10000
 168|48|M|other|80127
 169|52|F|other|53705
 170|53|F|healthcare|30067
@@ -198,7 +198,7 @@
 198|21|F|student|55414
 199|30|M|writer|17604
 200|40|M|programmer|93402
-201|27|M|writer|E2A4H
+201|27|M|writer|10000
 202|41|F|educator|60201
 203|25|F|student|32301
 204|52|F|librarian|10960
@@ -330,7 +330,7 @@
 330|35|F|educator|33884
 331|33|M|entertainment|91344
 332|20|M|student|40504
-333|47|M|other|V0R2M
+333|47|M|other|10000
 334|32|M|librarian|30002
 335|45|M|executive|33775
 336|23|M|salesman|42101
@@ -455,7 +455,7 @@
 455|48|M|administrator|83709
 456|24|M|technician|31820
 457|33|F|salesman|30011
-458|47|M|technician|Y1A6B
+458|47|M|technician|10000
 459|22|M|student|29201
 460|44|F|other|60630
 461|15|M|student|98102
@@ -487,7 +487,7 @@
 487|22|M|engineer|92121
 488|48|M|technician|21012
 489|55|M|other|45218
-490|29|F|artist|V5A2B
+490|29|F|artist|10000
 491|43|F|writer|53711
 492|57|M|educator|94618
 493|22|M|engineer|60090
@@ -575,7 +575,7 @@
 575|33|M|marketing|46032
 576|48|M|executive|98281
 577|36|F|student|77845
-578|31|M|administrator|M7A1A
+578|31|M|administrator|10000
 579|32|M|educator|48103
 580|16|M|student|17961
 581|37|M|other|94131
@@ -591,12 +591,12 @@
 591|57|F|librarian|92093
 592|18|M|student|97520
 593|31|F|educator|68767
-594|46|M|educator|M4J2K
+594|46|M|educator|10000
 595|25|M|programmer|31909
 596|20|M|artist|77073
 597|23|M|other|84116
 598|40|F|marketing|43085
-599|22|F|student|R3T5K
+599|22|F|student|10000
 600|34|M|programmer|02320
 601|19|F|artist|99687
 602|47|F|other|34656
@@ -631,7 +631,7 @@
 631|18|F|student|38866
 632|18|M|student|55454
 633|35|M|programmer|55414
-634|39|M|engineer|T8H1N
+634|39|M|engineer|10000
 635|22|M|other|23237
 636|47|M|educator|48043
 637|30|M|other|74101
@@ -706,7 +706,7 @@
 706|23|M|student|55454
 707|56|F|librarian|19146
 708|26|F|homemaker|96349
-709|21|M|other|N4T1A
+709|21|M|other|10000
 710|19|M|student|92020
 711|22|F|student|15203
 712|22|F|student|54901
@@ -716,7 +716,7 @@
 716|36|F|administrator|44265
 717|24|M|technician|84105
 718|42|M|technician|64118
-719|37|F|other|V0R2H
+719|37|F|other|10000
 720|49|F|administrator|16506
 721|24|F|entertainment|11238
 722|50|F|homemaker|17331
@@ -776,7 +776,7 @@
 776|30|M|librarian|51157
 777|63|M|programmer|01810
 778|34|M|student|01960
-779|31|M|student|K7L5J
+779|31|M|student|10000
 780|49|M|programmer|94560
 781|20|M|student|48825
 782|21|F|artist|33205
@@ -854,7 +854,7 @@
 854|29|F|student|55408
 855|53|M|librarian|04988
 856|43|F|marketing|97215
-857|35|F|administrator|V1G4L
+857|35|F|administrator|10000
 858|63|M|educator|09645
 859|18|F|other|06492
 860|70|F|retired|48322
@@ -898,7 +898,7 @@
 898|23|M|homemaker|61755
 899|32|M|other|55116
 900|60|M|retired|18505
-901|38|M|executive|L1V3W
+901|38|M|executive|10000
 902|45|F|artist|97203
 903|28|M|educator|20850
 904|17|F|student|61073
@@ -913,14 +913,14 @@
 913|27|M|student|76201
 914|44|F|other|08105
 915|50|M|entertainment|60614
-916|27|M|engineer|N2L5N
+916|27|M|engineer|10000
 917|22|F|student|20006
 918|40|M|scientist|70116
 919|25|M|other|14216
 920|30|F|artist|90008
 921|20|F|student|98801
 922|29|F|administrator|21114
-923|21|M|student|E2E3R
+923|21|M|student|10000
 924|29|M|other|11753
 925|18|F|salesman|49036
 926|49|M|entertainment|01701

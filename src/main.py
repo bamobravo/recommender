@@ -26,7 +26,6 @@ class Recommender:
 			self.model = utility.loadModel()
 			print('model loaded successfully')
 			return
-
 		edges =[('movie_id','zip_code'),('movie_id','gender'),('movie_id','age_class'),('zip_code','occupation'),('gender','occupation'),('occupation','genre'),('age_class','occupation'),('genre','CompanionContext'),('CompanionContext','rated')]
 		self.model = BayesianModel(edges)
 		zip_code,gender,age_class,movie_id,occupation,rated,genre_cpd,context_cpd = tuple(self.getCPDs())
@@ -35,16 +34,26 @@ class Recommender:
 
 		self.model.add_cpds(zip_code,gender,age_class,movie_id,occupation,rated,genre_cpd,context_cpd)
 		# self.model.add_cpds(genre_cpd,context_cpd)
+
 		if not self.model.check_model():
 			raise Exception('There is a problem creating the model')
 		utility.saveModel(self.model)
 		print('model built successfully')
 
+	def transform_genre(self,genres):
+		lookup ={}
+		filepath='saved/lookup.pickle'
+		with open(filepath,'rb') as fl:
+			lookup = pickle.load(fl)
+		result=[data.getIndex(x,[x.lower() for x in lookup['genre']],columnType='genre') for x in genres]
+		return result
 
 	def getCPDs(self):
 		genres = ['comedy','short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children',  'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
-		all_data = data.combine_data()
+		# genres = self.transform_genre(genres)
+		all_data = data.getTrainingData()
 		self.data = all_data[self.variables]
+		self.data = self.data.dropna()
 		mle = MaximumLikelihoodEstimator(self.model, self.data)
 		straightForward = ['zip_code','gender','age_class','movie_id','occupation','rated']
 		cpds = []
@@ -60,10 +69,10 @@ class Recommender:
 	def get_genre_cpds(self,genre,data):
 		total_count = len(genre)
 		# build for each genre and for each of the movies
+		genre_count = {str(x):1 for x in genre}
 		result=[]
 		occupations = list(pd.unique(data['occupation']))
 		for occupation in occupations:
-			genre_count = {x:1 for x in genre}
 			occupation_data = data[data['occupation']==occupation]
 			genre_count,ct = self.estimate_genre_count(occupation_data,genre_count)
 			result.append((occupation,genre_count,ct))
@@ -76,11 +85,13 @@ class Recommender:
 		total_count=len(keys.keys())
 
 		for index,row in data.iterrows():
-			genres = [ x.strip() for x in row['genre'].split(',') if x.strip()]
+			genres = [ x.strip() for x in str(row['genre']).split(',') if x.strip()] 
 			if not genres:
 				continue
 			total_count+=len(genres)
 			for g in genres:
+				if not g:
+					continue
 				keys[g]+=1
 
 		for k in keys:
@@ -134,6 +145,3 @@ class Recommender:
 		pass
 
 temp = Recommender()
-
-
-
