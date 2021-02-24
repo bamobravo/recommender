@@ -46,6 +46,10 @@ def loadList(path):
 		result= [x.strip() for x in text.split('\n')]
 		return result
 
+def hasGenre(val,pat):
+	values = val.split(',')
+	return pat in values
+	
 def buildLookup():
 	heading=['zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	result={}
@@ -103,7 +107,9 @@ def combine_data(filepath):
 	all_data['rated']=all_data['rating']>3
 	all_data = all_data.astype({'rated':'int'})
 	companions = list(all_data['CompanionContext'].unique())
-	all_data['CompanionContext']=all_data['CompanionContext'].apply(lambda x,arr: arr.index(x)+1,args=(companions,))
+	all_occupation = load_occupation_category()
+	all_data['CompanionContext']=all_data['CompanionContext'].apply(lambda x,arr: arr.index(x),args=(companions,))
+	all_data['occupation']=all_data['occupation'].apply(lambda x,arr: arr.index(x),args=(all_occupation,))
 	# all_data = all_data.transform(transform_function,axis=1)
 	# all_data = transformNumeric(all_data)
 	# return perform_data_split(all_data)
@@ -134,6 +140,25 @@ def perform_data_split(all_data):
 	testing.to_csv(testing_data_path,sep='\t', index=False)
 	return training
 
+def load_genre_category():
+	directory='datasets/ml-100k/u.genre'
+	result={}
+	all_genre={}
+	with open(directory,'r') as fl:
+		temp = [x.split('|') for x in fl.read().lower().split('\n') if x.strip()]
+		for tm in temp:
+			if len(tm)<2:
+				continue
+			result[tm[0]] =tm[1]
+		return result
+
+def load_occupation_category():
+	directory='datasets/ml-100k/u.occupation'
+	result={}
+	all_genre={}
+	with open(directory,'r') as fl:
+		return [x for x in fl.read().split('\n') if x]
+
 def combine_genre(all_data):
 	#might have to pik the row one after the the other
 	context_path='datasets/contextualdata_new.csv'
@@ -147,6 +172,7 @@ def combine_genre(all_data):
 	all_data.insert(5,'sport',0)
 	all_data.insert(5,'short',0)
 	genre_columns = ['short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children', 'comedy', 'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
+	genre_lookup = load_genre_category()
 	for index, row in all_data.iterrows():
 		try:
 			value=row['genre'].lower()
@@ -157,7 +183,7 @@ def combine_genre(all_data):
 			temp_genre = row[genre_columns]
 			for tp in genre_columns:
 				if row[tp]==1:
-					temp.append(tp)
+					temp.append(genre_lookup[tp])
 			all_data.at[index,'genre']=','.join(temp)
 		except Exception as e:
 			all_data.at[index,['genre']]=''

@@ -41,16 +41,21 @@ class Recommender:
 		print('model built successfully')
 
 	def transform_genre(self,genres):
-		lookup ={}
-		filepath='saved/lookup.pickle'
-		with open(filepath,'rb') as fl:
-			lookup = pickle.load(fl)
-		result=[data.getIndex(x,[x.lower() for x in lookup['genre']],columnType='genre') for x in genres]
+		lookup = data.load_genre_category()
+		result=[]
+		for g in genres:
+			result.append(lookup[g])
 		return result
+		# lookup ={}
+		# filepath='saved/lookup.pickle'
+		# with open(filepath,'rb') as fl:
+		# 	lookup = pickle.load(fl)
+		# result=[data.getIndex(x,[x.lower() for x in lookup['genre']],columnType='genre') for x in genres]
+		# return result
 
 	def getCPDs(self):
 		genres = ['comedy','short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children',  'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
-		# genres = self.transform_genre(genres)
+		genres = self.transform_genre(genres)
 		all_data = data.getTrainingData()
 		self.data = all_data[self.variables]
 		self.data = self.data.dropna()
@@ -102,13 +107,14 @@ class Recommender:
 		keys[list(keys.keys())[ind]]+=diff
 		return keys,total_count
 
-	def get_companion_context_cpd(self,genre,data):
-		context = list(pd.unique(data['CompanionContext']))
+	def get_companion_context_cpd(self,genre,trainingData):
+		context = list(pd.unique(trainingData['CompanionContext']))
 		res = []
 		for ge in genre:
 			context_count = {x:1 for x in context}
-			ct_index = data['genre'].str.contains(ge,regex=False,case=False)
-			ct_data = data[ct_index]
+			# pat=r','+ge+'|'+ge+','
+			ct_index = trainingData['genre'].apply(data.hasGenre,args=(ge,))
+			ct_data = trainingData[ct_index]
 			# ct_data = data[data['CompanionContext']==ct]
 			genre_count,ct = self.estimate_context_count(ct_data,context_count)
 			res.append((ct,genre_count,ct))
