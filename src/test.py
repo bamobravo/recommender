@@ -5,28 +5,32 @@ import pandas as pd
 from pgmpy.inference import VariableElimination
 import re
 
+"""
+Most of the function in this file are just preparing the test condition and also the data for testing
+"""
 
-def start_training():
-	testData = data.getTestData()
-	model = utility.loadModel()
-	y_values=testData['rated']
-	x_values = testData.loc[:,]
-	correct=0
-	evidence_columns = ['age','gender','occupation','zip_code','CompanionContext']
-	for index,row in testData.iterrows():
-		expected = row['rated']
-		variable =['rated']
-		evidences ={x:row[x] for x in evidence_columns}
-		derived = model.query(variables=variables,evidence=evidences)
-		print(derived)
-		exit()
+# def start_training():
+# 	testData = data.getTestData()
+# 	model = utility.loadModel()
+# 	y_values=testData['rated']
+# 	x_values = testData.loc[:,]
+# 	correct=0
+# 	evidence_columns = ['age','gender','occupation','zip_code','CompanionContext']
+# 	for index,row in testData.iterrows():
+# 		expected = row['rated']
+# 		variable =['rated']
+# 		evidences ={x:row[x] for x in evidence_columns}
+# 		derived = model.query(variables=variables,evidence=evidences)
+# 		print(derived)
+# 		exit()
 
 # start_training()
 
-def transform_data():
-	pass
 
 def groupby(field,data):
+	'''
+		This is a generic testing data grouping function,the function help categorise test data based on a particular field
+	'''
 	uniqueValues = data[field].unique()
 	result ={}
 	min_row=3
@@ -60,7 +64,11 @@ def getRecommendationContext(groupedData):
 			print('skipped')
 			continue
 	return testResult
+
 def getRecommendation(groupedData):
+	"""
+	This function get recommendation given an evidence variable.
+	"""
 	model = utility.loadModel()
 	inference = VariableElimination(model)
 	testResult={}
@@ -84,6 +92,9 @@ def getRecommendation(groupedData):
 	return testResult
 
 def getRecommendationByGenre(groupedData):
+	"""
+	This is also a data manipulation function for grouping the test data based on movie genre
+	"""
 	model = utility.loadModel()
 	inference = VariableElimination(model)
 	testResult={}
@@ -107,6 +118,9 @@ def getRecommendationByGenre(groupedData):
 
 # this is the function that will perform data grouping by user and by gender
 def testByUser():
+	"""
+	This function perform test based on user characteristics
+	"""
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data()
 	testData = testData[important]
@@ -126,6 +140,9 @@ def testByUser():
 
 
 def testByContext():
+	'''
+		perform test based on companion context
+	'''
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data()
 	testData = testData[important]
@@ -177,34 +194,59 @@ def testByGenre(type=1):
 	accuracy = correct/total_number
 	print('The accuracy ',accuracy)
 
+#Testing functions
 
-def runQueries():
+def test1():
 	print('runing the first query with test')
 	print("\t\tRecommendation of Top Movies based on given movie title genre")
 	testByGenre()
 	print('\n\n\n')
 
+def test2():
 	print("Running the second query with test")
 	print('\t\t Recommendation based on movies user have watched')
 	testByGenre()
 	print('\n\n\n')
 
+def test3():
 	print("Running the third query with test")
 	print('\t\t Recommendation using movie similarity')
 	testByGenre()
 	print('\n\n\n')
 
+def test4():
 	print("Running the fourth query with test")
 	print('\t\t Recommendation using user similarity')
 	testByUser()
 	print('\n\n\n')
 
+def test5():
 	print("Running the fifth query with test")
 	print('\t\t Recommendation using context')
 	testByContext()
 	print('\n\n\n')
 
+def runQueries():
+	"""
+	Entry to testing
+	"""
+	tests = [test1,test2,test3,test4,test5]
+	try:
+		test_number =int(input('Kindly specify the test you will like to run (1-5)'))
+		test_to_run = tests[test_number-1]
+		test_to_run()
+	except Exception as e:
+		print('invalid input')
+	
+	
 
+	
+
+	
+
+	
+
+# call the main function
 runQueries()
 # testByGenre()
 # grouping = testByUser()
