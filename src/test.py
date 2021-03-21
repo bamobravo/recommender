@@ -4,6 +4,8 @@ from itertools import product
 import pandas as pd
 from pgmpy.inference import VariableElimination
 import re
+from main import Recommender
+import traceback
 
 """
 Most of the function in this file are just preparing the test condition and also the data for testing
@@ -42,8 +44,8 @@ def groupby(field,data):
 		result[key]=temp
 	return result
 
-def getRecommendationContext(groupedData):
-	model = utility.loadModel()
+def getRecommendationContext(groupedData,fold):
+	model = utility.loadModel(fold)
 	inference = VariableElimination(model)
 	testResult={}
 	for user in groupedData:
@@ -65,11 +67,11 @@ def getRecommendationContext(groupedData):
 			continue
 	return testResult
 
-def getRecommendation(groupedData):
+def getRecommendation(groupedData,fold):
 	"""
 	This function get recommendation given an evidence variable.
 	"""
-	model = utility.loadModel()
+	model = utility.loadModel(fold)
 	inference = VariableElimination(model)
 	testResult={}
 	for user in groupedData:
@@ -91,11 +93,12 @@ def getRecommendation(groupedData):
 			continue
 	return testResult
 
-def getRecommendationByGenre(groupedData):
+def getRecommendationByGenre(groupedData,fold):
 	"""
 	This is also a data manipulation function for grouping the test data based on movie genre
 	"""
-	model = utility.loadModel()
+
+	model = utility.loadModel(fold)
 	inference = VariableElimination(model)
 	testResult={}
 	for user in groupedData:
@@ -117,16 +120,16 @@ def getRecommendationByGenre(groupedData):
 	return testResult
 
 # this is the function that will perform data grouping by user and by gender
-def testByUser():
+def testByUser(fold=False):
 	"""
 	This function perform test based on user characteristics
 	"""
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
-	testData = data.load_test_data()
+	testData = data.load_test_data(fold)
 	testData = testData[important]
 	testData = testData.dropna()
 	groupedData = groupby('user_id',testData)
-	all_movies_recommendation = getRecommendation(groupedData)
+	all_movies_recommendation = getRecommendation(groupedData,fold)
 	total_number =0
 	correct=0
 	for user in all_movies_recommendation:
@@ -137,9 +140,10 @@ def testByUser():
 		correct += len(correct_value)
 	accuracy = correct/total_number
 	print('The accuracy ',accuracy)
+	return accuracy
 
 
-def testByContext():
+def testByContext(fold=False):
 	'''
 		perform test based on companion context
 	'''
@@ -148,7 +152,7 @@ def testByContext():
 	testData = testData[important]
 	testData = testData.dropna()
 	groupedData = groupby('CompanionContext',testData)
-	all_movies_recommendation = getRecommendationContext(groupedData)
+	all_movies_recommendation = getRecommendationContext(groupedData,fold)
 	total_number =0
 	correct=0
 	for user in all_movies_recommendation:
@@ -159,8 +163,7 @@ def testByContext():
 		correct += len(correct_value)
 	accuracy = correct/total_number
 	print('The accuracy ',accuracy)
-
-
+	return accuracy
 
 
 def groupByGenre(testData):
@@ -176,15 +179,15 @@ def groupByGenre(testData):
 		result[ge]=all_movies
 	return result
 
-def testByGenre(type=1):
+def testByGenre(type=1,fold=False):
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
-	testData = data.load_test_data()
+	testData = data.load_test_data(fold)
 	testData = testData[important]
 	testData = testData.dropna()
 	groupedData = groupByGenre(testData)
-	all_movies_recommendation = getRecommendationByGenre(groupedData)
+	all_movies_recommendation = getRecommendationByGenre(groupedData,fold)
 	total_number =0
-	correct=0
+	correct=0 
 	for user in all_movies_recommendation:
 		movies=groupedData[user]
 		predictedData = [x[0] for x in all_movies_recommendation[user]]
@@ -193,37 +196,83 @@ def testByGenre(type=1):
 		correct += len(correct_value)
 	accuracy = correct/total_number
 	print('The accuracy ',accuracy)
+	return accuracy
 
 #Testing functions
 
 def test1():
 	print('runing the first query with test')
 	print("\t\tRecommendation of Top Movies based on given movie title genre")
-	testByGenre()
+	fold_count = 5
+	total_accuracy=0
+	for i in range(fold_count):
+		fold = i+1
+		temp = Recommender(fold)
+		tempModel = temp.buildModel()
+		accuracy=testByGenre(fold=fold)
+		total_accuracy+=accuracy
+		print(accuracy)
+	print(total_accuracy/fold_count)
 	print('\n\n\n')
 
 def test2():
 	print("Running the second query with test")
 	print('\t\t Recommendation based on movies user have watched')
-	testByGenre()
+	fold_count = 5
+	total_accuracy=0
+	for i in range(fold_count):
+		fold = i+1
+		temp = Recommender(fold)
+		tempModel = temp.buildModel()
+		accuracy=testByGenre(fold=fold)
+		total_accuracy+=accuracy
+		print(accuracy)
+	print(total_accuracy/fold_count)
 	print('\n\n\n')
 
 def test3():
 	print("Running the third query with test")
 	print('\t\t Recommendation using movie similarity')
-	testByGenre()
+	fold_count = 5
+	total_accuracy=0
+	for i in range(fold_count):
+		fold = i+1
+		temp = Recommender(fold)
+		tempModel = temp.buildModel()
+		accuracy=testByGenre(fold=fold)
+		total_accuracy+=accuracy
+		print(accuracy)
+	print(total_accuracy/fold_count)
 	print('\n\n\n')
 
 def test4():
 	print("Running the fourth query with test")
 	print('\t\t Recommendation using user similarity')
-	testByUser()
+	fold_count = 5
+	total_accuracy=0
+	for i in range(fold_count):
+		fold = i+1
+		temp = Recommender(fold)
+		tempModel = temp.buildModel()
+		accuracy=testByUser(fold=fold)
+		total_accuracy+=accuracy
+		print(accuracy)
+	print(total_accuracy/fold_count)
 	print('\n\n\n')
 
 def test5():
 	print("Running the fifth query with test")
 	print('\t\t Recommendation using context')
-	testByContext()
+	fold_count = 5
+	total_accuracy=0
+	for i in range(fold_count):
+		fold = i+1
+		temp = Recommender(fold)
+		tempModel = temp.buildModel()
+		accuracy=testByContext(fold=fold)
+		total_accuracy+=accuracy
+		print(accuracy)
+	print(total_accuracy/fold_count)
 	print('\n\n\n')
 
 def runQueries():
@@ -236,8 +285,11 @@ def runQueries():
 		test_to_run = tests[test_number-1]
 		test_to_run()
 	except Exception as e:
+		print(e)
+		print(traceback.format_exc())
 		print('invalid input')
 	
+
 	
 
 	

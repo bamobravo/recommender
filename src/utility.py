@@ -1,7 +1,7 @@
 import pickle
 
-def saveModel(model):
-	filename='saved/model.bat'
+def saveModel(model,filename):
+	# filename='saved/model.bat'
 	try:
 		with open(filename,'wb') as fl:
 			pickle.dump(model,fl)
@@ -10,9 +10,10 @@ def saveModel(model):
 		raise e
 
 
-
-def loadModel():
-	filename='saved/model.bat'
+def loadModel(filename):
+	# filename='saved/model.bat'
+	if isinstance(filename,int):
+		filename = 'saved/model'+str(filename)+'.bat'
 	try:
 		with open(filename,'rb') as fl:
 			result = pickle.load(fl)

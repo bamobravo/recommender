@@ -88,7 +88,7 @@ def transformNumeric(all_data):
 		print('processing ',index+1)
 	return all_data
 
-def combine_data(filepath):
+def combine_data(filepath,fold=False):
 	directory='datasets/ml-100k/'
 	u_data = pd.read_csv(directory+filepath,sep='\t',names=['user_id','movie_id','rating','rating_time'])
 	movie_genres=['unknown','action','adventure','animation','children','comedy','crime','documentary','drama','fantasy','film-noir','horror','musical','mystery','romance','sci-fi','thriller','war','western']
@@ -115,20 +115,23 @@ def combine_data(filepath):
 	# return perform_data_split(all_data)
 	return all_data
 
-def getTrainingData():
+def getTrainingData(fold=False):
+	training_data_path= 'saved/training'+str(fold)+'.csv' if fold else 'saved/training.csv'
 	if os.path.isfile(training_data_path):
 		result = pd.read_csv(training_data_path,sep='\t')
 		return result
-	filepath='ua.base'
+	filepath= 'u'+str(fold)+'.base' if fold else 'ua.base'
 	result = combine_data(filepath)
 	result.to_csv(training_data_path,sep='\t',index=False)
 	return result
 
-def getTestData():
+def getTestData(fold=False):
+	testing_data_path= 'saved/testing'+str(fold)+'.csv' if fold else 'saved/testing.csv'
 	if os.path.isfile(testing_data_path):
 		result = pd.read_csv(testing_data_path,sep='\t')
 		return result
-	filepath='ua.test'
+	# filepath='ua.test'
+	filepath= 'u'+str(fold)+'.test' if fold else 'ua.test'
 	result = combine_data(filepath)
 	result.to_csv(testing_data_path,sep='\t',index=False)
 	return result
@@ -190,11 +193,12 @@ def combine_genre(all_data):
 			continue
 	return all_data
 
-def load_test_data():
+def load_test_data(fold=False):
+	testing_data_path = 'saved/testing'+str(fold)+'.csv' if fold else 'saved/testing.csv'
 	if os.path.isfile(testing_data_path):
 		result=pd.read_csv(testing_data_path,sep='\t')
 		return result
-	return getTestData()
+	return getTestData(fold)
 	
 
 # print(getTrainingData())

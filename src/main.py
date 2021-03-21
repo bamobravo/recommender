@@ -15,17 +15,18 @@ import os
 
 class Recommender:
 	"""docstring """
-	def __init__(self):
+	def __init__(self,fold=False):
 		self.variables=['zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
-		self.buildModel()
+		self.fold = fold
+		# self.buildModel()
 		
 
 	def buildModel(self):
-		filename = 'saved/model.bat'
+		filename = 'saved/model'+str(self.fold if self.fold else '')+'.bat'
 		if os.path.isfile(filename):
-			self.model = utility.loadModel()
+			self.model = utility.loadModel(filename)
 			print('model loaded successfully')
-			return
+			return self.model
 		edges =[('movie_id','zip_code'),('movie_id','gender'),('movie_id','age_class'),('zip_code','occupation'),('gender','occupation'),('occupation','genre'),('age_class','occupation'),('genre','CompanionContext'),('CompanionContext','rated')]
 		self.model = BayesianModel(edges)
 		zip_code,gender,age_class,movie_id,occupation,rated,genre_cpd,context_cpd = tuple(self.getCPDs())
@@ -37,9 +38,11 @@ class Recommender:
 
 		if not self.model.check_model():
 			raise Exception('There is a problem creating the model')
-		utility.saveModel(self.model)
+		utility.saveModel(self.model,filename)
 		print('model built successfully')
+		return self.model
 
+ 
 	def transform_genre(self,genres):
 		lookup = data.load_genre_category()
 		result=[]
@@ -56,7 +59,7 @@ class Recommender:
 	def getCPDs(self):
 		genres = ['comedy','short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children',  'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
 		genres = self.transform_genre(genres)
-		all_data = data.getTrainingData()
+		all_data = data.getTrainingData(self.fold)
 		self.data = all_data[self.variables]
 		self.data = self.data.dropna()
 		mle = MaximumLikelihoodEstimator(self.model, self.data)
