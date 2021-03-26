@@ -44,8 +44,7 @@ def groupby(field,data):
 		result[key]=temp
 	return result
 
-def getRecommendationContext(groupedData,fold):
-	model = utility.loadModel(fold)
+def getRecommendationContext(model,groupedData,fold):
 	inference = VariableElimination(model)
 	testResult={}
 	for user in groupedData:
@@ -67,11 +66,10 @@ def getRecommendationContext(groupedData,fold):
 			continue
 	return testResult
 
-def getRecommendation(groupedData,fold):
+def getRecommendation(model,groupedData,fold):
 	"""
 	This function get recommendation given an evidence variable.
 	"""
-	model = utility.loadModel(fold)
 	inference = VariableElimination(model)
 	testResult={}
 	for user in groupedData:
@@ -93,12 +91,11 @@ def getRecommendation(groupedData,fold):
 			continue
 	return testResult
 
-def getRecommendationByGenre(groupedData,fold):
+def getRecommendationByGenre(model,groupedData,fold):
 	"""
 	This is also a data manipulation function for grouping the test data based on movie genre
 	"""
 
-	model = utility.loadModel(fold)
 	inference = VariableElimination(model)
 	testResult={}
 	for user in groupedData:
@@ -124,12 +121,15 @@ def testByUser(fold=False):
 	"""
 	This function perform test based on user characteristics
 	"""
+	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data(fold)
 	testData = testData[important]
 	testData = testData.dropna()
+	testData['genre'] = testData['genre'].astype('int')
 	groupedData = groupby('user_id',testData)
-	all_movies_recommendation = getRecommendation(groupedData,fold)
+	precision, recall,fscore = estimateMetrics(model,testData)
+	all_movies_recommendation = getRecommendation(model,groupedData,fold)
 	total_number =0
 	correct=0
 	for user in all_movies_recommendation:
@@ -139,20 +139,23 @@ def testByUser(fold=False):
 		total_number+= len(testData)
 		correct += len(correct_value)
 	accuracy = correct/total_number
-	print('The accuracy ',accuracy)
-	return accuracy
+	print('The accuracy ',accuracy,' precision is:',precision,' recall is: ',recall,' fscore is: ',fscore)
+	return accuracy,precision,recall,fscore
 
 
 def testByContext(fold=False):
 	'''
 		perform test based on companion context
 	'''
+	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data()
 	testData = testData[important]
 	testData = testData.dropna()
+	testData['genre'] = testData['genre'].astype('int')
 	groupedData = groupby('CompanionContext',testData)
-	all_movies_recommendation = getRecommendationContext(groupedData,fold)
+	precision, recall,fscore = estimateMetrics(model,testData)
+	all_movies_recommendation = getRecommendationContext(model,groupedData,fold)
 	total_number =0
 	correct=0
 	for user in all_movies_recommendation:
@@ -162,16 +165,28 @@ def testByContext(fold=False):
 		total_number+= len(testData)
 		correct += len(correct_value)
 	accuracy = correct/total_number
-	print('The accuracy ',accuracy)
-	return accuracy
+	print('The accuracy ',accuracy,' precision is:',precision,' recall is: ',recall,' fscore is: ',fscore)
+	return accuracy,precision,recall,fscore
 
+def groupByGenreForMetrics(testData):
+	all_genre = data.load_genre_category()
+	result={}
+	for genre in all_genre:
+		ge = all_genre[genre]
+		index = testData['genre']==int(ge)
+		temp =testData[index]
+		if temp.empty:
+			continue
+		# all_movies=temp['movie_id']
+		result[ge]=temp
+	return result
 
 def groupByGenre(testData):
 	all_genre = data.load_genre_category()
 	result={}
 	for genre in all_genre:
 		ge = all_genre[genre]
-		index = testData['genre'].apply(data.hasGenre,args=(ge,))
+		index = testData['genre']==int(ge)
 		temp =testData[index]
 		if temp.empty:
 			continue
@@ -180,12 +195,15 @@ def groupByGenre(testData):
 	return result
 
 def testByGenre(type=1,fold=False):
+	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data(fold)
 	testData = testData[important]
 	testData = testData.dropna()
+	testData['genre'] = testData['genre'].astype('int')
 	groupedData = groupByGenre(testData)
-	all_movies_recommendation = getRecommendationByGenre(groupedData,fold)
+	precision, recall,fscore = estimateMetrics(model,testData)
+	all_movies_recommendation = getRecommendationByGenre(model,groupedData,fold)
 	total_number =0
 	correct=0 
 	for user in all_movies_recommendation:
@@ -195,24 +213,78 @@ def testByGenre(type=1,fold=False):
 		total_number+= len(movies)
 		correct += len(correct_value)
 	accuracy = correct/total_number
-	print('The accuracy ',accuracy)
-	return accuracy
+	print('The accuracy ',accuracy,' precision is:',precision,' recall is: ',recall,' fscore is: ',fscore)
+	return accuracy,precision,recall,fscore
 
 #Testing functions
 
+
+def estimateSingleMetrics(inference,data):
+	columns=['movie_id','genre','gender','CompanionContext','zip_code','occupation','age_class']
+	y_values = data['rated']
+	tPositive=0
+	tNegative =0
+	fPositive=0
+	fNegative =0
+	for index, row in data.iterrows():
+		evidences={x:row[x] for x in columns}
+		variable =['rated']
+		result = inference.map_query(variables=variable,evidence=evidences)
+		expected = row['rated']
+		predicted = result['rated']
+		if predicted==1:
+			if expected==1:
+				tPositive+=1
+			else:
+				fPositive+=1
+		else:
+			if expected==1:
+				fPositive+=1
+			else:
+				fNegative+=1
+		# exit()
+	precision = tPositive/(tPositive+fPositive)
+	recall =  tPositive/(tPositive+fNegative)
+	fscore = (2* precision * recall)/(precision+recall)
+	return precision,recall,fscore
+
+def estimateMetrics(model,data):
+	data = groupByGenreForMetrics(data)
+	inference = VariableElimination(model)
+	precision =0
+	recall =0
+	fscore = 0
+	count=0
+	for genre in data:
+		p,r,f =estimateSingleMetrics(inference,data[genre])
+		precision+=p
+		recall+=r
+		fscore+=f
+		count+=1
+	return precision/count,recall/count,fscore/count
+
 def test1():
-	print('runing the first query with test')
+	print('running the first query with test')
 	print("\t\tRecommendation of Top Movies based on given movie title genre")
 	fold_count = 5
 	total_accuracy=0
+	total_precision=0
+	total_recall=0
+	total_fscore=0
 	for i in range(fold_count):
 		fold = i+1
 		temp = Recommender(fold)
 		tempModel = temp.buildModel()
-		accuracy=testByGenre(fold=fold)
+		accuracy,precision,recall,fscore=testByGenre(fold=fold)
 		total_accuracy+=accuracy
-		print(accuracy)
-	print(total_accuracy/fold_count)
+		total_precision+=precision
+		total_recall+=recall
+		total_fscore+=fscore
+		# print(accuracy)
+	print('Accuracy: ',total_accuracy/fold_count)
+	print('Precision: ',total_precision/fold_count)
+	print('Recall: ',total_recall/fold_count)
+	print('F-score: ',total_fscore/fold_count)
 	print('\n\n\n')
 
 def test2():
@@ -220,14 +292,22 @@ def test2():
 	print('\t\t Recommendation based on movies user have watched')
 	fold_count = 5
 	total_accuracy=0
+	total_precision=0
+	total_recall=0
+	total_fscore=0
 	for i in range(fold_count):
 		fold = i+1
 		temp = Recommender(fold)
 		tempModel = temp.buildModel()
-		accuracy=testByGenre(fold=fold)
+		accuracy,precision,recall,fscore=testByGenre(fold=fold)
 		total_accuracy+=accuracy
-		print(accuracy)
-	print(total_accuracy/fold_count)
+		total_precision+=precision
+		total_recall+=recall
+		total_fscore+=fscore
+	print('Accuracy: ',total_accuracy/fold_count)
+	print('Precision: ',total_precision/fold_count)
+	print('Recall: ',total_recall/fold_count)
+	print('F-score: ',total_fscore/fold_count)
 	print('\n\n\n')
 
 def test3():
@@ -235,14 +315,22 @@ def test3():
 	print('\t\t Recommendation using movie similarity')
 	fold_count = 5
 	total_accuracy=0
+	total_precision=0
+	total_recall=0
+	total_fscore=0
 	for i in range(fold_count):
 		fold = i+1
 		temp = Recommender(fold)
 		tempModel = temp.buildModel()
-		accuracy=testByGenre(fold=fold)
+		accuracy,precision,recall,fscore=testByGenre(fold=fold)
 		total_accuracy+=accuracy
-		print(accuracy)
-	print(total_accuracy/fold_count)
+		total_precision+=precision
+		total_recall+=recall
+		total_fscore+=fscore
+	print('Accuracy: ',total_accuracy/fold_count)
+	print('Precision: ',total_precision/fold_count)
+	print('Recall: ',total_recall/fold_count)
+	print('F-score: ',total_fscore/fold_count)
 	print('\n\n\n')
 
 def test4():
@@ -250,14 +338,23 @@ def test4():
 	print('\t\t Recommendation using user similarity')
 	fold_count = 5
 	total_accuracy=0
+	total_precision=0
+	total_recall=0
+	total_fscore=0
 	for i in range(fold_count):
 		fold = i+1
 		temp = Recommender(fold)
 		tempModel = temp.buildModel()
-		accuracy=testByUser(fold=fold)
+		accuracy,precision,recall,fscore=testByUser(fold=fold)
 		total_accuracy+=accuracy
-		print(accuracy)
-	print(total_accuracy/fold_count)
+		total_precision+=precision
+		total_recall+=recall
+		total_fscore+=fscore
+		# print(accuracy)
+	print('Accuracy: ',total_accuracy/fold_count)
+	print('Precision: ',total_precision/fold_count)
+	print('Recall: ',total_recall/fold_count)
+	print('F-score: ',total_fscore/fold_count)
 	print('\n\n\n')
 
 def test5():
@@ -269,10 +366,16 @@ def test5():
 		fold = i+1
 		temp = Recommender(fold)
 		tempModel = temp.buildModel()
-		accuracy=testByContext(fold=fold)
+		accuracy,precision,recall,fscore=testByContext(fold=fold)
 		total_accuracy+=accuracy
-		print(accuracy)
-	print(total_accuracy/fold_count)
+		total_precision+=precision
+		total_recall+=recall
+		total_fscore+=fscore
+		# print(accuracy)
+	print('Accuracy: ',total_accuracy/fold_count)
+	print('Precision: ',total_precision/fold_count)
+	print('Recall: ',total_recall/fold_count)
+	print('F-score: ',total_fscore/fold_count)
 	print('\n\n\n')
 
 def runQueries():

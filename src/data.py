@@ -55,8 +55,8 @@ def buildLookup():
 	result={}
 	result['occupation']=loadList('u.occupation')
 	result['']
-	print(result['occupation'])
-	exit()
+	# print(result['occupation'])
+	# exit()
 	lookup = {x:list(all_data[x].unique()) for x in heading}
 	temp_genre =[]
 	lookup['genre']=['comedy','short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children',  'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
@@ -126,6 +126,7 @@ def getTrainingData(fold=False):
 	return result
 
 def getTestData(fold=False):
+	#need to replicate the dataframe
 	testing_data_path= 'saved/testing'+str(fold)+'.csv' if fold else 'saved/testing.csv'
 	if os.path.isfile(testing_data_path):
 		result = pd.read_csv(testing_data_path,sep='\t')
@@ -176,6 +177,7 @@ def combine_genre(all_data):
 	all_data.insert(5,'short',0)
 	genre_columns = ['short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children', 'comedy', 'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
 	genre_lookup = load_genre_category()
+	additional_frame = pd.DataFrame(columns=all_data.columns)
 	for index, row in all_data.iterrows():
 		try:
 			value=row['genre'].lower()
@@ -187,10 +189,18 @@ def combine_genre(all_data):
 			for tp in genre_columns:
 				if row[tp]==1:
 					temp.append(genre_lookup[tp])
-			all_data.at[index,'genre']=','.join(temp)
+
+			# all_data.at[index,'genre']=','.join(temp)
+			all_data.at[index,'genre']=int(temp[0]) if temp else np.nan
+			for x in temp[1:]:
+				row['genre']=int(x)
+				additional_frame =additional_frame.append(row)
 		except Exception as e:
-			all_data.at[index,['genre']]=''
+			print(e)
+			# exit()
+			all_data.at[index,['genre']]=np.nan
 			continue
+	all_data = all_data.append(additional_frame)
 	return all_data
 
 def load_test_data(fold=False):

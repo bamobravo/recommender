@@ -16,7 +16,7 @@ import os
 class Recommender:
 	"""docstring """
 	def __init__(self,fold=False):
-		self.variables=['zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
+		self.variables=['movie_id','zip_code','occupation','gender','age_class','genre','CompanionContext','rated']
 		self.fold = fold
 		# self.buildModel()
 		
@@ -27,13 +27,13 @@ class Recommender:
 			self.model = utility.loadModel(filename)
 			print('model loaded successfully')
 			return self.model
-		edges =[('movie_id','zip_code'),('movie_id','gender'),('movie_id','age_class'),('zip_code','occupation'),('gender','occupation'),('occupation','genre'),('age_class','occupation'),('genre','CompanionContext'),('CompanionContext','rated')]
+		edges =[('movie_id','zip_code'),('movie_id','gender'),('movie_id','occupation'),('zip_code','age_class'),('gender','occupation'),('age_class','occupation'),('occupation','genre'),('genre','CompanionContext'),('CompanionContext','rated')]
 		self.model = BayesianModel(edges)
-		zip_code,gender,age_class,movie_id,occupation,rated,genre_cpd,context_cpd = tuple(self.getCPDs())
+		movie_id,zip_code,gender,age_class,occupation,rated,genre_cpd,context_cpd = tuple(self.getCPDs())
 
 		# genre_cpd,context_cpd = tuple(self.getCPDs())
 
-		self.model.add_cpds(zip_code,gender,age_class,movie_id,occupation,rated,genre_cpd,context_cpd)
+		self.model.add_cpds(movie_id,zip_code,gender,age_class,occupation,rated,genre_cpd,context_cpd)
 		# self.model.add_cpds(genre_cpd,context_cpd)
 
 		if not self.model.check_model():
@@ -63,15 +63,14 @@ class Recommender:
 		self.data = all_data[self.variables]
 		self.data = self.data.dropna()
 		mle = MaximumLikelihoodEstimator(self.model, self.data)
-		straightForward = ['zip_code','gender','age_class','movie_id','occupation','rated']
+		straightForward = ['movie_id','zip_code','gender','age_class','occupation','rated','CompanionContext','genre']
 		cpds = []
-		genre_cpd = self.get_genre_cpds(genres,self.data)
-		companion_cpd = self.get_companion_context_cpd(genres,self.data)
+		# genre_cpd = self.get_genre_cpds(genres,self.data)
+		# companion_cpd = self.get_companion_context_cpd(genres,self.data)
 		for item in straightForward:
 			cpds.append(mle.estimate_cpd(item))
-		cpds.append(companion_cpd)
-		cpds.append(genre_cpd)
-		
+		# cpds.append(companion_cpd)
+		# cpds.append(genre_cpd)
 		return cpds
 
 	def get_genre_cpds(self,genre,data):
