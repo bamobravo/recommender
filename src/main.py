@@ -17,7 +17,8 @@ class Recommender:
 	"""docstring """
 	def __init__(self,fold=False):
 		self.variables=['movie_id','zip_code','occupation','gender','age_class','genre','CompanionContext','rated']
-		self.fold = fold
+		temp = ['a','b']
+		self.fold = temp[fold-1]
 		# self.buildModel()
 		
 

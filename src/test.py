@@ -28,6 +28,11 @@ Most of the function in this file are just preparing the test condition and also
 
 # start_training()
 
+fold_count = 2
+
+def translateFold(fold):
+	temp =['a','b']
+	return temp[fold-1]
 
 def groupby(field,data):
 	'''
@@ -121,6 +126,7 @@ def testByUser(fold=False):
 	"""
 	This function perform test based on user characteristics
 	"""
+	fold = translateFold(fold)
 	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data(fold)
@@ -147,6 +153,7 @@ def testByContext(fold=False):
 	'''
 		perform test based on companion context
 	'''
+	fold = translateFold(fold)
 	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data()
@@ -195,6 +202,7 @@ def groupByGenre(testData):
 	return result
 
 def testByGenre(type=1,fold=False):
+	fold = translateFold(fold)
 	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data(fold)
@@ -266,7 +274,6 @@ def estimateMetrics(model,data):
 def test1():
 	print('running the first query with test')
 	print("\t\tRecommendation of Top Movies based on given movie title genre")
-	fold_count = 5
 	total_accuracy=0
 	total_precision=0
 	total_recall=0
@@ -290,7 +297,6 @@ def test1():
 def test2():
 	print("Running the second query with test")
 	print('\t\t Recommendation based on movies user have watched')
-	fold_count = 5
 	total_accuracy=0
 	total_precision=0
 	total_recall=0
@@ -313,7 +319,6 @@ def test2():
 def test3():
 	print("Running the third query with test")
 	print('\t\t Recommendation using movie similarity')
-	fold_count = 5
 	total_accuracy=0
 	total_precision=0
 	total_recall=0
@@ -336,7 +341,6 @@ def test3():
 def test4():
 	print("Running the fourth query with test")
 	print('\t\t Recommendation using user similarity')
-	fold_count = 5
 	total_accuracy=0
 	total_precision=0
 	total_recall=0
@@ -360,7 +364,6 @@ def test4():
 def test5():
 	print("Running the fifth query with test")
 	print('\t\t Recommendation using context')
-	fold_count = 5
 	total_accuracy=0
 	for i in range(fold_count):
 		fold = i+1
