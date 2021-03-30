@@ -12,7 +12,7 @@ def saveModel(model,filename):
 
 def loadModel(filename):
 	# filename='saved/model.bat'
-	if isinstance(filename,int):
+	if isinstance(filename,int) or len(filename) ==1:
 		filename = 'saved/model'+str(filename)+'.bat'
 	try:
 		with open(filename,'rb') as fl:

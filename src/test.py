@@ -234,9 +234,11 @@ def estimateSingleMetrics(inference,data):
 	tNegative =0
 	fPositive=0
 	fNegative =0
+	count=0
 	for index, row in data.iterrows():
 		evidences={x:row[x] for x in columns}
 		variable =['rated']
+		count+=1
 		result = inference.map_query(variables=variable,evidence=evidences)
 		expected = row['rated']
 		predicted = result['rated']
@@ -250,13 +252,17 @@ def estimateSingleMetrics(inference,data):
 				fPositive+=1
 			else:
 				fNegative+=1
+		print('processed ',count,' of ',data.shape[0])
 		# exit()
 	precision = tPositive/(tPositive+fPositive)
 	recall =  tPositive/(tPositive+fNegative)
 	fscore = (2* precision * recall)/(precision+recall)
+	print('completed single iteration \n\n\n')
+	print(precision,recall,fscore)
 	return precision,recall,fscore
 
 def estimateMetrics(model,data):
+	print('estimating new metrics \n\n')
 	data = groupByGenreForMetrics(data)
 	inference = VariableElimination(model)
 	precision =0
@@ -264,6 +270,7 @@ def estimateMetrics(model,data):
 	fscore = 0
 	count=0
 	for genre in data:
+		print('estimating metrics for genre ',genre,' total count',data[genre].shape[0],'\n\n----------------------------------------------------------\n\n')
 		p,r,f =estimateSingleMetrics(inference,data[genre])
 		precision+=p
 		recall+=r
