@@ -372,6 +372,9 @@ def test5():
 	print("Running the fifth query with test")
 	print('\t\t Recommendation using context')
 	total_accuracy=0
+	total_precision=0
+	total_recall=0
+	total_fscore=0
 	for i in range(fold_count):
 		fold = i+1
 		temp = Recommender(fold)
