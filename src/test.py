@@ -29,6 +29,8 @@ Most of the function in this file are just preparing the test condition and also
 # start_training()
 
 fold_count = 2
+#this is the value that test if to get best N count of more
+
 
 def translateFold(fold):
 	temp =['a','b']
@@ -88,6 +90,8 @@ def getRecommendation(model,groupedData,fold):
 			result =(x for x in zip(res.state_names['movie_id'],res.values) if x[1])
 			result = sorted(result,key=lambda x:x[1],reverse=True)
 			testResult[user]=result
+			# this is to quickly test what is happening and how to quickly perform the top testing
+			# return testResult
 		except Exception as e:
 
 			print(e)
@@ -126,6 +130,7 @@ def testByUser(fold=False):
 	"""
 	This function perform test based on user characteristics
 	"""
+	global topN
 	fold = translateFold(fold)
 	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
@@ -134,12 +139,23 @@ def testByUser(fold=False):
 	testData = testData.dropna()
 	testData['genre'] = testData['genre'].astype('int')
 	groupedData = groupby('user_id',testData)
-	precision, recall,fscore = estimateMetrics(model,testData)
+	precision,recall,fscore=0,0,0
+	if topN < 0:
+		precision, recall,fscore = estimateMetrics(model,testData)
+
 	all_movies_recommendation = getRecommendation(model,groupedData,fold)
+	#you can change to top N here
+	if topN>0:
+		# all_movies_recommendation = 
+		precision,recall,fscore = estimateTopNMetrics(model,testData,all_movies_recommendation)
 	total_number =0
 	correct=0
 	for user in all_movies_recommendation:
-		testData=groupedData[user]['movie_id'].unique()
+		testData = None
+		if topN>0:
+			testData=groupedData[user][:topN]['movie_id'].unique()
+		else:
+			testData=groupedData[user]['movie_id'].unique()
 		predictedData = [x[0] for x in all_movies_recommendation[user]]
 		correct_value = [x for x in testData  if x in predictedData]
 		total_number+= len(testData)
@@ -278,6 +294,34 @@ def estimateMetrics(model,data):
 		count+=1
 	return precision/count,recall/count,fscore/count
 
+def filterTopNMovies(data,recommendations):
+	global topN
+	distinctMovies = []
+	for user in recommendations:
+		# get just the movie id
+		temp =[x[0] for x in recommendations[user][:topN]]
+		distinctMovies+=temp
+	distinctMovies = set(distinctMovies)
+	result = data[data['movie_id'].isin(distinctMovies)]
+	return result
+
+def estimateTopNMetrics(model,all_data,movie_recommendations):
+	print('estimating new metrics \n\n')
+	data = filterTopNMovies(all_data,movie_recommendations)
+	data = groupByGenreForMetrics(data)
+	inference = VariableElimination(model)
+	precision =0
+	recall =0
+	fscore = 0
+	count=0
+	for genre in data:
+		print('estimating metrics for genre ',genre,' total count',data[genre].shape[0],'\n\n----------------------------------------------------------\n\n')
+		p,r,f =estimateSingleMetrics(inference,data[genre])
+		precision+=p
+		recall+=r
+		fscore+=f
+		count+=1
+	return precision/count,recall/count,fscore/count
 def test1():
 	print('running the first query with test')
 	print("\t\tRecommendation of Top Movies based on given movie title genre")
@@ -348,6 +392,7 @@ def test3():
 def test4():
 	print("Running the fourth query with test")
 	print('\t\t Recommendation using user similarity')
+	print(topN)
 	total_accuracy=0
 	total_precision=0
 	total_recall=0
@@ -391,14 +436,22 @@ def test5():
 	print('F-score: ',total_fscore/fold_count)
 	print('\n\n\n')
 
+topN=-1
 def runQueries():
 	"""
 	Entry to testing
 	"""
+	global topN
 	tests = [test1,test2,test3,test4,test5]
 	try:
 		test_number =int(input('Kindly specify the test you will like to run (1-5)'))
 		test_to_run = tests[test_number-1]
+		temp = input('What value of N will do you like to run for the top N test? (leave empty of type -1 to skip top N test)')
+		if not temp:
+			temp='-1'
+		if temp.isnumeric():
+			topN= int(temp)
+			print(topN)
 		test_to_run()
 	except Exception as e:
 		print(e)
