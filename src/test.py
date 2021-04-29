@@ -322,6 +322,7 @@ def estimateTopNMetrics(model,all_data,movie_recommendations):
 		fscore+=f
 		count+=1
 	return precision/count,recall/count,fscore/count
+
 def test1():
 	print('running the first query with test')
 	print("\t\tRecommendation of Top Movies based on given movie title genre")
@@ -436,11 +437,14 @@ def test5():
 	print('F-score: ',total_fscore/fold_count)
 	print('\n\n\n')
 
+
 topN=-1
 def runQueries():
 	"""
 	Entry to testing
+	split the training data before trying to running the split
 	"""
+	foldCount=5
 	global topN
 	tests = [test1,test2,test3,test4,test5]
 	try:

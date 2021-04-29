@@ -5,6 +5,7 @@ This file will contain a collection of function for manipulating the data
 import numpy as np
 import pandas as pd 
 import os
+import math
 from sklearn.model_selection import train_test_split
 training_data_path='saved/training.csv'
 testing_data_path = 'saved/testing.csv'
@@ -115,13 +116,47 @@ def combine_data(filepath,fold=False):
 	# return perform_data_split(all_data)
 	return all_data
 
+def splitTrainingTest(data,fold):
+	split=0.8
+	size = data.shape[0]
+	trainingRange = math.ceil(size*split)
+	trainingData=data[0:trainingRange]
+	testData = data[trainingRange:]
+	trainingPath='saved/training'+str(fold)+'.csv'
+	testPath='saved/testing'+str(fold)+'.csv'
+	trainingData.to_csv(trainingPath,index=False)
+	testData.to_csv(testPath,sep='\t',index=False)
+
+def breakToFold(data,foldCount):
+	unique_users = data['user_id'].unique()
+	result=[]
+	for x in range(foldCount):
+		result.append(pd.DataFrame(columns=data.columns))
+
+	for user in unique_users:
+		userData = data[data['user_id']==user].drop_duplicates().sample(frac=1)
+		# break into separate folds
+		start=0
+		size = math.ceil(userData.shape[0]/foldCount)
+		for x in range(foldCount):
+			result[x]=pd.concat([result[x],userData[start:start+size]])
+			start+=size
+	# now save the files separately
+	for i in range(len(result)):
+		splitTrainingTest(result[i],i+1)
+	exit()
+
+
 def getTrainingData(fold=False):
 	training_data_path= 'saved/training'+str(fold)+'.csv' if fold else 'saved/training.csv'
 	if os.path.isfile(training_data_path):
 		result = pd.read_csv(training_data_path,sep='\t')
 		return result
 	filepath= 'u'+str(fold)+'.base' if fold else 'ua.base'
+	filepath ='u.data'
 	result = combine_data(filepath)
+	# foldCount=5
+	# breakToFold(result,foldCount)
 	result.to_csv(training_data_path,sep='\t',index=False)
 	return result
 

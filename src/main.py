@@ -17,8 +17,8 @@ class Recommender:
 	"""docstring """
 	def __init__(self,fold=False):
 		self.variables=['movie_id','zip_code','occupation','gender','age_class','genre','CompanionContext','rated']
-		temp = ['a','b']
-		self.fold = temp[fold-1]
+		# temp = ['a','b']
+		self.fold = fold#temp[fold-1]
 		# self.buildModel()
 		
 
@@ -61,6 +61,8 @@ class Recommender:
 		genres = ['comedy','short', 'sport','history', 'biography', 'family', 'music', 'unknown', 'action','adventure', 'animation', 'children',  'crime', 'documentary','drama', 'fantasy', 'film-noir', 'horror', 'musical', 'mystery','romance', 'sci-fi', 'thriller', 'war', 'western']
 		genres = self.transform_genre(genres)
 		all_data = data.getTrainingData(self.fold)
+		print(all_data)
+		exit()
 		self.data = all_data[self.variables]
 		self.data = self.data.dropna()
 		mle = MaximumLikelihoodEstimator(self.model, self.data)
