@@ -131,7 +131,7 @@ def testByUser(fold=False):
 	This function perform test based on user characteristics
 	"""
 	global topN
-	fold = translateFold(fold)
+	# fold = translateFold(fold)
 	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data(fold)
@@ -169,7 +169,7 @@ def testByContext(fold=False):
 	'''
 		perform test based on companion context
 	'''
-	fold = translateFold(fold)
+	# fold = translateFold(fold)
 	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data()
@@ -218,7 +218,7 @@ def groupByGenre(testData):
 	return result
 
 def testByGenre(type=1,fold=False):
-	fold = translateFold(fold)
+	# fold = translateFold(fold)
 	model = utility.loadModel(fold)
 	important =['user_id','zip_code','occupation','gender','age_class','movie_id','genre','CompanionContext','rated']
 	testData = data.load_test_data(fold)
@@ -444,6 +444,7 @@ def runQueries():
 	Entry to testing
 	split the training data before trying to running the split
 	"""
+	test4()
 	foldCount=5
 	global topN
 	tests = [test1,test2,test3,test4,test5]

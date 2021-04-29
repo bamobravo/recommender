@@ -124,7 +124,7 @@ def splitTrainingTest(data,fold):
 	testData = data[trainingRange:]
 	trainingPath='saved/training'+str(fold)+'.csv'
 	testPath='saved/testing'+str(fold)+'.csv'
-	trainingData.to_csv(trainingPath,index=False)
+	trainingData.to_csv(trainingPath,sep='\t',index=False)
 	testData.to_csv(testPath,sep='\t',index=False)
 
 def breakToFold(data,foldCount):
@@ -144,6 +144,7 @@ def breakToFold(data,foldCount):
 	# now save the files separately
 	for i in range(len(result)):
 		splitTrainingTest(result[i],i+1)
+	print('done breaing task')
 	exit()
 
 
