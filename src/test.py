@@ -244,35 +244,42 @@ def testByGenre(type=1,fold=False):
 
 
 def estimateSingleMetrics(inference,data):
-	columns=['movie_id','genre','gender','CompanionContext','zip_code','occupation','age_class']
-	y_values = data['rated']
+	columns=['movie_id','rated','CompanionContext','zip_code','occupation','age_class']
+	y_values = data['gender']
 	tPositive=0
 	tNegative =0
 	fPositive=0
 	fNegative =0
 	count=0
 	for index, row in data.iterrows():
-		evidences={x:row[x] for x in columns}
-		variable =['rated']
-		count+=1
-		result = inference.map_query(variables=variable,evidence=evidences)
-		expected = row['rated']
-		predicted = result['rated']
-		if predicted==1:
-			if expected==1:
-				tPositive+=1
+		try:
+			evidences={x:row[x] for x in columns}
+			variable =['gender']
+			result = inference.map_query(variables=variable,evidence=evidences)
+			count+=1
+			expected = row['gender']
+			predicted = result['gender']
+			if predicted=='M':
+				if expected==predicted:
+					tPositive+=1
+				else:
+					fPositive+=1
 			else:
-				fPositive+=1
-		else:
-			if expected==1:
-				fPositive+=1
-			else:
-				fNegative+=1
-		print('processed ',count,' of ',data.shape[0])
-		# exit()
+				if expected==predicted:
+					tNegative+=1
+				else:
+					fNegative+=1
+			print('processed ',count,' of ',data.shape[0])
+			print("True Positive:"+str(tPositive),"False Positive: "+str(fPositive),"False Negative: "+str(fNegative),"True Negative:"+str(tNegative),sep='\t')
+			print('\n')
+			# exit()
+		except Exception as e:
+			print(e)
+			print('skipping some functions here')
+			continue
 	precision = tPositive/(tPositive+fPositive)
 	recall =  tPositive/(tPositive+fNegative)
-	fscore = (2* precision * recall)/(precision+recall)
+	fscore = 2*(( precision * recall)/(precision+recall))
 	print('completed single iteration \n\n\n')
 	print(precision,recall,fscore)
 	return precision,recall,fscore
@@ -288,10 +295,16 @@ def estimateMetrics(model,data):
 	for genre in data:
 		print('estimating metrics for genre ',genre,' total count',data[genre].shape[0],'\n\n----------------------------------------------------------\n\n')
 		p,r,f =estimateSingleMetrics(inference,data[genre])
-		precision+=p
-		recall+=r
-		fscore+=f
-		count+=1
+		if p and r and f:
+			precision+=p
+			recall+=r
+			fscore+=f
+			count+=1
+	# if count ==0:
+	# 	return False,False,False
+	print('this is the first thing to note')
+	print(count)
+	print('printing the value of count here', count,'\n\n\n')
 	return precision/count,recall/count,fscore/count
 
 def filterTopNMovies(data,recommendations):
@@ -444,7 +457,7 @@ def runQueries():
 	Entry to testing
 	split the training data before trying to running the split
 	"""
-	test4()
+	# test4()
 	foldCount=5
 	global topN
 	tests = [test1,test2,test3,test4,test5]
