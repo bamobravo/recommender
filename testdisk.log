@@ -1,0 +1,128 @@
+
+
+Sun May  9 09:46:54 2021
+Command line: TestDisk
+
+TestDisk 7.1, Data Recovery Utility, July 2019
+Christophe GRENIER <grenier@cgsecurity.org>
+https://www.cgsecurity.org
+OS: Linux, kernel 5.8.0-50-generic (#56~20.04.1-Ubuntu SMP Mon Apr 12 21:46:35 UTC 2021) x86_64
+Compiler: GCC 9.2
+ext2fs lib: 1.45.5, ntfs lib: libntfs-3g, reiserfs lib: none, ewf lib: none, curses lib: ncurses 6.1
+User is not root!
+Hard disk list
+
+
+TestDisk exited normally.
+Using locale 'en_US.UTF-8'.
+
+
+Sun May  9 09:46:54 2021
+Command line: TestDisk /debug
+
+TestDisk 7.1, Data Recovery Utility, July 2019
+Christophe GRENIER <grenier@cgsecurity.org>
+https://www.cgsecurity.org
+OS: Linux, kernel 5.8.0-50-generic (#56~20.04.1-Ubuntu SMP Mon Apr 12 21:46:35 UTC 2021) x86_64
+Compiler: GCC 9.2
+ext2fs lib: 1.45.5, ntfs lib: libntfs-3g, reiserfs lib: none, ewf lib: none, curses lib: ncurses 6.1
+/dev/sda: LBA, HPA, LBA48, DCO support
+/dev/sda: size       976773168 sectors
+/dev/sda: user_max   976773168 sectors
+/dev/sda: native_max 976773168 sectors
+/dev/sda: dco        976773168 sectors
+Warning: can't get size for Disk /dev/mapper/control - 0 B - 0 sectors, sector size=512
+Warning: can't get size for Disk /dev/loop42 - 0 B - 0 sectors, sector size=512
+Hard disk list
+Disk /dev/sda - 500 GB / 465 GiB - CHS 60801 255 63, sector size=512 - HGST HTS545050A7E380, S/N:130326TE85113R26KK2J, FW:GG2OAC90
+Disk /dev/sdb - 1000 GB / 931 GiB - CHS 121601 255 63, sector size=512 - StoreJet Transcend
+Disk /dev/loop0 - 123 MB / 117 MiB - 241520 sectors (RO), sector size=512
+Disk /dev/loop1 - 123 MB / 117 MiB - 241520 sectors (RO), sector size=512
+Disk /dev/loop10 - 58 MB / 55 MiB - 113592 sectors (RO), sector size=512
+Disk /dev/loop11 - 58 MB / 55 MiB - 113560 sectors (RO), sector size=512
+Disk /dev/loop12 - 64 MB / 61 MiB - 126224 sectors (RO), sector size=512
+Disk /dev/loop13 - 64 MB / 61 MiB - 126408 sectors (RO), sector size=512
+Disk /dev/loop14 - 16 MB / 16 MiB - 33136 sectors (RO), sector size=512
+Disk /dev/loop15 - 250 MB / 238 MiB - 488952 sectors (RO), sector size=512
+Disk /dev/loop16 - 16 MB / 16 MiB - 33032 sectors (RO), sector size=512
+Disk /dev/loop17 - 170 MB / 162 MiB - 333552 sectors (RO), sector size=512
+Disk /dev/loop18 - 281 MB / 268 MiB - 550376 sectors (RO), sector size=512
+Disk /dev/loop19 - 229 MB / 218 MiB - 448496 sectors (RO), sector size=512
+Disk /dev/loop2 - 9519 KB / 9296 KiB - 18592 sectors (RO), sector size=512
+Disk /dev/loop20 - 228 MB / 217 MiB - 446248 sectors (RO), sector size=512
+Disk /dev/loop21 - 169 MB / 161 MiB - 330576 sectors (RO), sector size=512
+Disk /dev/loop22 - 255 MB / 243 MiB - 499536 sectors (RO), sector size=512
+Disk /dev/loop23 - 143 KB / 140 KiB - 280 sectors (RO), sector size=512
+Disk /dev/loop24 - 135 KB / 132 KiB - 264 sectors (RO), sector size=512
+Disk /dev/loop25 - 27 MB / 26 MiB - 53472 sectors (RO), sector size=512
+Disk /dev/loop26 - 68 MB / 65 MiB - 133320 sectors (RO), sector size=512
+Disk /dev/loop27 - 67 MB / 64 MiB - 132648 sectors (RO), sector size=512
+Disk /dev/loop28 - 27 MB / 26 MiB - 53536 sectors (RO), sector size=512
+Disk /dev/loop29 - 53 MB / 51 MiB - 104496 sectors (RO), sector size=512
+Disk /dev/loop3 - 84 MB / 80 MiB - 164184 sectors (RO), sector size=512
+Disk /dev/loop30 - 8454 KB / 8256 KiB - 16512 sectors (RO), sector size=512
+Disk /dev/loop31 - 67 MB / 64 MiB - 131952 sectors (RO), sector size=512
+Disk /dev/loop32 - 33 MB / 32 MiB - 66096 sectors (RO), sector size=512
+Disk /dev/loop33 - 33 MB / 32 MiB - 66096 sectors (RO), sector size=512
+Disk /dev/loop34 - 53 MB / 51 MiB - 104536 sectors (RO), sector size=512
+Disk /dev/loop35 - 273 MB / 260 MiB - 533936 sectors (RO), sector size=512
+Disk /dev/loop36 - 315 MB / 301 MiB - 616696 sectors (RO), sector size=512
+Disk /dev/loop37 - 315 MB / 301 MiB - 616712 sectors (RO), sector size=512
+Disk /dev/loop38 - 20 MB / 19 MiB - 40504 sectors (RO), sector size=512
+Disk /dev/loop39 - 252 MB / 240 MiB - 492712 sectors (RO), sector size=512
+Disk /dev/loop4 - 9531 KB / 9308 KiB - 18616 sectors (RO), sector size=512
+Disk /dev/loop40 - 252 MB / 240 MiB - 492712 sectors (RO), sector size=512
+Disk /dev/loop41 - 20 MB / 19 MiB - 40504 sectors (RO), sector size=512
+Disk /dev/loop5 - 82 MB / 78 MiB - 161104 sectors (RO), sector size=512
+Disk /dev/loop6 - 209 MB / 199 MiB - 408440 sectors (RO), sector size=512
+Disk /dev/loop7 - 231 MB / 220 MiB - 451296 sectors (RO), sector size=512
+Disk /dev/loop8 - 104 MB / 99 MiB - 203184 sectors (RO), sector size=512
+Disk /dev/loop9 - 103 MB / 99 MiB - 203056 sectors (RO), sector size=512
+
+Partition table type (auto): Intel
+Disk /dev/sdb - 1000 GB / 931 GiB - StoreJet Transcend
+Partition table type: Intel
+
+Analyse Disk /dev/sdb - 1000 GB / 931 GiB - CHS 121601 255 63
+Geometry from i386 MBR: head=255 sector=63
+NTFS at 0/32/33
+Current partition structure:
+ 1 * HPFS - NTFS              0  32 33 121601  25 24 1953519616
+
+search_part()
+Disk /dev/sdb - 1000 GB / 931 GiB - CHS 121601 255 63
+NTFS at 0/32/33
+filesystem size           1953519616
+sectors_per_cluster       8
+mft_lcn                   4
+mftmirr_lcn               122094975
+clusters_per_mft_record   -10
+clusters_per_index_record 1
+     HPFS - NTFS              0  32 33 121601  25 24 1953519616
+     NTFS, blocksize=4096, 1000 GB / 931 GiB
+
+Results
+   * HPFS - NTFS              0  32 33 121601  25 24 1953519616
+     NTFS, blocksize=4096, 1000 GB / 931 GiB
+
+Hint for advanced users: dmsetup may be used if you prefer to avoid rewriting the partition table for the moment:
+echo "0 1953519616 linear /dev/sdb 2048" | dmsetup create test0
+
+interface_write()
+ 1 * HPFS - NTFS              0  32 33 121601  25 24 1953519616
+
+interface_write()
+ 1 * HPFS - NTFS              0  32 33 121601  25 24 1953519616
+simulate write!
+
+write_mbr_i386: starting...
+write_all_log_i386: starting...
+No extended partition
+
+Interface Advanced
+Geometry from i386 MBR: head=255 sector=63
+NTFS at 0/32/33
+ 1 * HPFS - NTFS              0  32 33 121601  25 24 1953519616
+     NTFS, blocksize=4096, 1000 GB / 931 GiB
+
+TestDisk exited normally.

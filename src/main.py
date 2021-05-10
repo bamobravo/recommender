@@ -18,7 +18,8 @@ class Recommender:
 	def __init__(self,fold=False):
 		self.variables=['movie_id','zip_code','occupation','gender','age_class','genre','CompanionContext','rated']
 		# temp = ['a','b']
-		self.fold = fold+1#temp[fold-1]
+		# self.fold = fold+1#temp[fold-1]
+		self.fold =fold
 		# print(self.fold)
 
 		# self.buildModel()

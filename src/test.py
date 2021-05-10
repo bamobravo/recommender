@@ -82,7 +82,7 @@ def getRecommendation(model,groupedData,fold):
 	for user in groupedData:
 		try:
 			temp_data = groupedData[user]
-			user_fields=['gender','zip_code','age_class','rated','CompanionContext','occupation']
+			user_fields=['gender','zip_code','age_class','rated','CompanionContext']
 			variable=['movie_id']
 			user_field_values = [temp_data.iloc[0]['gender'],temp_data.iloc[0]['zip_code'],temp_data.iloc[0]['age_class'],1,temp_data.iloc[0]['CompanionContext'],temp_data.iloc[0]['occupation']]
 			evidences={x[0]:x[1] for x in zip(user_fields,user_field_values)}
@@ -125,6 +125,18 @@ def getRecommendationByGenre(model,groupedData,fold):
 			continue
 	return testResult
 
+def filterAbsentMovies(model, data):
+	minOccurrence=15 
+	presents =model.get_cpds('movie_id').state_names['movie_id']
+	result = data[data['movie_id'].isin(presents)]
+	counting = result.groupby('movie_id')
+	include =[]
+	for name,group in counting:
+		if group.shape[0] >= minOccurrence:
+			include.append(name)
+	result = result[result['movie_id'].isin(include)]
+	return result
+	
 # this is the function that will perform data grouping by user and by gender
 def testByUser(fold=False):
 	"""
@@ -137,6 +149,7 @@ def testByUser(fold=False):
 	testData = data.load_test_data(fold)
 	testData = testData[important]
 	testData = testData.dropna()
+	testData = filterAbsentMovies(model,testData)
 	testData['genre'] = testData['genre'].astype('int')
 	groupedData = groupby('user_id',testData)
 	precision,recall,fscore=0,0,0
@@ -151,16 +164,17 @@ def testByUser(fold=False):
 	total_number =0
 	correct=0
 	for user in all_movies_recommendation:
-		testData = None
+		tempData = None
 		if topN>0:
-			testData=groupedData[user][:topN]['movie_id'].unique()
+			tempData=groupedData[user][:topN]['movie_id'].unique()
 		else:
-			testData=groupedData[user]['movie_id'].unique()
+			tempData=groupedData[user]['movie_id'].unique()
 		predictedData = [x[0] for x in all_movies_recommendation[user]]
-		correct_value = [x for x in testData  if x in predictedData]
-		total_number+= len(testData)
+		# this should be data that was part of the data the model was trained with
+		correct_value = [x for x in tempData  if x in predictedData]
+		total_number+= len(tempData)
 		correct += len(correct_value)
-	accuracy = correct/total_number
+	accuracy = correct/total_number if total_number > 0 else False
 	print('The accuracy ',accuracy,' precision is:',precision,' recall is: ',recall,' fscore is: ',fscore)
 	return accuracy,precision,recall,fscore
 
@@ -231,6 +245,7 @@ def testByGenre(type=1,fold=False):
 	total_number =0
 	correct=0 
 	for user in all_movies_recommendation:
+		# is the movies part of the one used in generating the models?
 		movies=groupedData[user]
 		predictedData = [x[0] for x in all_movies_recommendation[user]]
 		correct_value = [x for x in movies  if x in predictedData]
@@ -244,7 +259,7 @@ def testByGenre(type=1,fold=False):
 
 
 def estimateSingleMetrics(inference,data):
-	columns=['movie_id','rated','CompanionContext','zip_code','occupation','age_class']
+	columns=['movie_id','rated','age_class']
 	y_values = data['gender']
 	tPositive=0
 	tNegative =0
@@ -277,9 +292,9 @@ def estimateSingleMetrics(inference,data):
 			print(e)
 			print('skipping some functions here')
 			continue
-	precision = tPositive/(tPositive+fPositive)
-	recall =  tPositive/(tPositive+fNegative)
-	fscore = 2*(( precision * recall)/(precision+recall))
+	precision = tPositive/(tPositive+fPositive) if (tPositive+fPositive) > 0 else False
+	recall =  tPositive/(tPositive+fNegative) if (tPositive+fNegative)>0 else False
+	fscore = 2*(( precision * recall)/(precision+recall)) if (precision+recall) > 0 else False
 	print('completed single iteration \n\n\n')
 	print(precision,recall,fscore)
 	return precision,recall,fscore
@@ -457,7 +472,7 @@ def runQueries():
 	Entry to testing
 	split the training data before trying to running the split
 	"""
-	# test4()
+	test4()
 	foldCount=5
 	global topN
 	tests = [test1,test2,test3,test4,test5]
