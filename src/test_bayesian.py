@@ -126,7 +126,7 @@ def getRecommendationByGenre(model,groupedData,fold):
 	return testResult
 
 def filterAbsentMovies(model, data):
-	minOccurrence=10 
+	minOccurrence=50 
 	presents =model.get_cpds('movie_id').state_names['movie_id']
 	result = data[data['movie_id'].isin(presents)]
 	counting = result.groupby('movie_id')
@@ -477,7 +477,6 @@ def runQueries():
 	Entry to testing
 	split the training data before trying to running the split
 	"""
-	test4()
 	foldCount=5
 	global topN
 	tests = [test1,test2,test3,test4]
