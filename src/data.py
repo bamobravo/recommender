@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 training_data_path='saved/training.csv'
 testing_data_path = 'saved/testing.csv'
 import pickle
+minYear=2000
 
 lookup ={}
 filepath='saved/lookup.pickle'
@@ -150,12 +151,14 @@ def breakToFold(data,foldCount):
 
 def getTrainingData(fold=False):
 	training_data_path= 'saved/training'+str(fold)+'.csv' if fold else 'saved/training.csv'
-	if os.path.isfile(training_data_path):
+	if False and os.path.isfile(training_data_path):
 		result = pd.read_csv(training_data_path,sep='\t')
 		return result
 	filepath= 'u'+str(fold)+'.base' if fold else 'ua.base'
 	filepath ='u.data'
 	result = combine_data(filepath)
+	result['recency']=pd.to_datetime(result['release_date']).dt.year < minYear
+	# result['release_year']=
 	# foldCount=5
 	# breakToFold(result,foldCount)
 	result.to_csv(training_data_path,sep='\t',index=False)
@@ -164,12 +167,13 @@ def getTrainingData(fold=False):
 def getTestData(fold=False):
 	#need to replicate the dataframe
 	testing_data_path= 'saved/testing'+str(fold)+'.csv' if fold else 'saved/testing.csv'
-	if os.path.isfile(testing_data_path):
+	if False and os.path.isfile(testing_data_path):
 		result = pd.read_csv(testing_data_path,sep='\t')
 		return result
 	# filepath='ua.test'
 	filepath= 'u'+str(fold)+'.test' if fold else 'ua.test'
 	result = combine_data(filepath)
+	result['recency']=pd.to_datetime(result['release_date']).dt.year < minYear
 	result.to_csv(testing_data_path,sep='\t',index=False)
 	return result
 
@@ -241,12 +245,14 @@ def combine_genre(all_data):
 
 def load_test_data(fold=False):
 	testing_data_path = 'saved/testing'+str(fold)+'.csv' if fold else 'saved/testing.csv'
-	if os.path.isfile(testing_data_path):
+	if False and os.path.isfile(testing_data_path):
 		result=pd.read_csv(testing_data_path,sep='\t')
 		return result
 	return getTestData(fold)
 	
-
+# temp = getTrainingData();
+# print(temp.columns)
+# exit()
 # print(getTrainingData())
 # exit()
 # all_data =combine_data()
